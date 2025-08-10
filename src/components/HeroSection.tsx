@@ -1,12 +1,28 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 
 import PhoneMockup from '@/components/PhoneMockup';
-import { HoverBorderGradient } from '@/components/ui/hover-border-gradient';
+import { BorderMagicButton } from '@/components/ui/border-magic-button';
+import { EarlyAccessModal } from '@/components/ui/early-access-modal';
+import { signupEarlyAccess } from '@/lib/supabase';
 
 const HeroSection: React.FC = () => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleEarlyAccessClick = () => {
+    setIsModalOpen(true);
+  };
+
+  const handleModalClose = () => {
+    setIsModalOpen(false);
+  };
+
+  const handleEarlyAccessSubmit = async (email: string, device: 'ios' | 'android') => {
+    return await signupEarlyAccess(email, device, 'hero-cta');
+  };
+
   return (
     <section className="relative min-h-screen flex items-center justify-center bg-gray-50 overflow-hidden">
       {/* Background decorative elements */}
@@ -55,14 +71,13 @@ const HeroSection: React.FC = () => {
               transition={{ duration: 0.8, delay: 0.6 }}
               className="flex justify-center lg:justify-start"
             >
-              <HoverBorderGradient
-                containerClassName="rounded-[20px]"
-                as="button"
-                className="bg-sky-500 hover:bg-sky-600 text-white px-8 py-3 text-lg font-semibold transition-colors duration-200"
-                duration={2}
+              <BorderMagicButton
+                className="text-lg font-semibold px-8 py-3"
+                containerClassName="h-14"
+                onClick={handleEarlyAccessClick}
               >
                 Get Early Access 🚀
-              </HoverBorderGradient>
+              </BorderMagicButton>
             </motion.div>
           </motion.div>
 
@@ -78,7 +93,12 @@ const HeroSection: React.FC = () => {
         </div>
       </div>
 
-
+      {/* Early Access Modal */}
+      <EarlyAccessModal
+        isOpen={isModalOpen}
+        onClose={handleModalClose}
+        onSubmit={handleEarlyAccessSubmit}
+      />
     </section>
   );
 };
