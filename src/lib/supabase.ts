@@ -1,15 +1,23 @@
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-// Validate environment variables
-if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error('Missing Supabase environment variables. Please check your .env.local file.');
+// Create Supabase client with runtime validation
+function createSupabaseClient() {
+  if (!supabaseUrl || !supabaseAnonKey) {
+    // During build time, return a mock client to prevent build errors
+    if (typeof window === 'undefined' && process.env.NODE_ENV === 'production') {
+      console.warn('Supabase environment variables not available during build');
+      return null as any;
+    }
+    throw new Error('Missing Supabase environment variables. Please check your .env.local file.');
+  }
+  return createClient(supabaseUrl, supabaseAnonKey);
 }
 
 // Create Supabase client for frontend use
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+export const supabase = createSupabaseClient();
 
 // Database types
 export interface EmailSignup {
@@ -31,6 +39,10 @@ export interface EarlyAccessSignup {
 
 // Email signup function
 export async function signupEmail(email: string, source: string = 'unknown') {
+  if (!supabase) {
+    return { success: false, message: 'Database connection not available.' };
+  }
+
   try {
     const { data, error } = await supabase
       .from('email_signups')
@@ -61,6 +73,10 @@ export async function signupEmail(email: string, source: string = 'unknown') {
 
 // Early access signup function
 export async function signupEarlyAccess(email: string, deviceType: 'ios' | 'android', source: string = 'hero-cta') {
+  if (!supabase) {
+    return { success: false, message: 'Database connection not available.' };
+  }
+
   try {
     console.log('Attempting to insert:', { email, device_type: deviceType, source });
     
@@ -113,6 +129,10 @@ export async function signupEarlyAccess(email: string, deviceType: 'ios' | 'andr
 
 // Get all email signups (for admin use)
 export async function getEmailSignups() {
+  if (!supabase) {
+    return { success: false, data: [] };
+  }
+
   try {
     const { data, error } = await supabase
       .from('email_signups')
@@ -132,6 +152,10 @@ export async function getEmailSignups() {
 
 // Get all early access signups (for admin use)
 export async function getEarlyAccessSignups() {
+  if (!supabase) {
+    return { success: false, data: [] };
+  }
+
   try {
     const { data, error } = await supabase
       .from('early_access_signups')
