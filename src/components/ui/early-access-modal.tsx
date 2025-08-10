@@ -46,7 +46,7 @@ export const EarlyAccessModal: React.FC<EarlyAccessModalProps> = ({
           handleClose();
         }, 2000);
       }
-    } catch (error) {
+    } catch {
       setMessage({
         type: 'error',
         text: 'Something went wrong. Please try again.',

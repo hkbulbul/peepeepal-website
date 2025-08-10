@@ -1,15 +1,15 @@
-import { createClient } from '@supabase/supabase-js';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
 // Create Supabase client with runtime validation
-function createSupabaseClient() {
+function createSupabaseClient(): SupabaseClient | null {
   if (!supabaseUrl || !supabaseAnonKey) {
-    // During build time, return a mock client to prevent build errors
+    // During build time, return null to prevent build errors
     if (typeof window === 'undefined' && process.env.NODE_ENV === 'production') {
       console.warn('Supabase environment variables not available during build');
-      return null as any;
+      return null;
     }
     throw new Error('Missing Supabase environment variables. Please check your .env.local file.');
   }
